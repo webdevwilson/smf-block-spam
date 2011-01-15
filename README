@@ -1,0 +1,9 @@
+Ant Targets:
+clean - Delete previous build artifacts
+package - Package the SMF mod
+
+Build Structure:
+res - project resources, any non-php based files used in the package
+res/install - install / upgrade scripts
+src - php sources to be packaged
+src/install - php sources included in install scripts

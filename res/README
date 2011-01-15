@@ -1,0 +1,8 @@
+${project.description}
+This MOD uses Akismet to block spam posts and registrations in SMF
+NOTE: In order to use this MOD, you need to have a WordPress API Key. If you don't have one, please see http://wordpress.com/api-keys/.
+Until you enter your WordPress API key (via the SMF Admin Panel, under 'Block Spam'), this MOD will not function.
+
+
+(c) ${project.copyright.year} ${project.author.name} - ${project.author.url}
+Version: ${project.version} (${build.id})

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE package-info SYSTEM "http://www.simplemachines.org/xml/package-info">
+<package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
+    <id>${project.author.id}:${project.name}</id>
+    <name>${project.description}</name>
+    <version>${project.version}</version>
+    <type>modification</type>
+
+    <install for="1.1.12">
+        <readme>README</readme>
+        <require-dir name="BlockSpam" destination="$sourcedir" />
+        <require-file name="BlockSpam.php" destination="$sourcedir" />
+        <require-file name="BlockSpam.template.php" destination="$themedir" />
+        <modification format="xml" type="file">install/install.xml</modification> 
+        <code>install/migrations/1.0-install.php</code>
+    </install>
+    <uninstall for="1.1.12">
+        <remove-dir name="$sourcedir/BlockSpam" />
+        <remove-file name="$themedir/BlockSpam.template.php" />
+        <modification type="file" reverse="true">install/install.xml</modification>
+        <code>install/migrations/1.0-rollback.php</code>
+    </uninstall>
+
+    <install>
+        <readme type="inline">Sorry, but ${project.description} is compatible with SMF < 1.1.12. Please
+        email ${project.author.name} at ${project.author.email} for more information.
+        </readme>
+    </install>
+    
+</package-info>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="smf-block-spam" default="package" basedir=".">
+
+    <!-- project metadata -->
+    <property name="project.name"           value="${ant.project.name}" />
+    <property name="project.description"    value="SMF Block Spam" />
+    <property name="project.version"        value="0.1" />
+    <property name="project.author.id"      value="webdevwilson" />
+    <property name="project.author.name"    value="Kerry Wilson" />
+    <property name="project.author.email"   value="kwilson@goodercode.com" />
+    <property name="project.author.url"     value="http://www.goodercode.com" />
+    <property name="project.copyright.year" value="2011" />
+
+    <!-- build configuration -->
+<!--    <property name="base.dir"               value="." />-->
+    <property name="src.dir"                value="${basedir}/src" />
+    <property name="res.dir"                value="${basedir}/res" />
+    <property name="target.dir"             value="${basedir}/target" />
+    <property name="package.dir"            value="${target.dir}/pkg" />
+
+    <!-- package structure -->
+    <property name="package.name"           value="${project.name}-${project.version}" />
+    <property name="package.zip"            value="${target.dir}/${package.name}.zip" />
+    
+    <target name="clean">
+        <delete dir="${target.dir}" />
+    </target>
+
+    <target name="package">
+
+        <tstamp>
+            <format property="build.id" pattern="yyyyMMddHHmm" />
+        </tstamp>
+
+        <loadfile property="header.txt" srcFile="${res.dir}/header.txt">
+            <filterchain>
+                <expandproperties />
+            </filterchain>
+        </loadfile>
+
+        <mkdir dir="${package.dir}" />
+
+        <echo>Copying php sources</echo>
+        <copy todir="${package.dir}">
+            <filterchain>
+                <expandproperties />
+            </filterchain>
+            <fileset dir="${src.dir}" includes="**/*.php" excludes="install/*" />
+        </copy>
+
+        <echo>Copying package metadata</echo>
+        <copy todir="${package.dir}">
+            <filterchain>
+                <expandproperties />
+            </filterchain>
+            <fileset dir="${res.dir}" includes="**/*" excludes="header.txt" />
+        </copy>
+
+        <zip basedir="${package.dir}" destfile="${package.zip}" />
+
+    </target>
+
+</project>
