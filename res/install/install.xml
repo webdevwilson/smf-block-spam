@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+    <id>${build.author.id}:${project.name}</id>
+    <version>${project.version}</version>
+	<file name="$boarddir/index.php">
+		<operation>
+			<search position="before"><![CDATA[
+		'.xml' => array('News.php', 'ShowXmlFeed'),
+]]></search>
+			<add><![CDATA[
+		'blockspam' => array('BlockSpam.php', 'BlockSpam'),
+]]>
+			</add>
+		</operation>
+	</file>
+    <file name="$themedir/index.template.php" error="fatal">
+        <operation error="fatal">
+            <search position="before" regexp="false" whitespace="exact">'viewErrorLog', 'viewmembers'</search>
+            <add>, 'blockspam'</add>
+        </operation>
+    </file>
+    <file name="$languagedir/Modifications.english.php" error="fatal">
+        <operation error="fatal">
+            <search position="after" regexp="false" whitespace="exact"><![CDATA[?>]]></search>
+            <add><![CDATA[
+
+$txt['blockspam_plugin'] = 'BlockSpam Plugin';
+$txt['blockspam_admin_top'] = 'Monitor and configure the BlockSpam plugin';
+$txt['blockspam_flagged_posts'] = 'Flagged Posts';
+$txt['blockspam_settings'] = 'Settings';
+$txt['blockspam_apikey'] = 'Akismet API Key';
+$txt['blockspam_apikey_message'] = 'BlockSpam utilizes the Akismet service.  You will need an API key.  Visit <a href=\'https://akismet.com/signup/\'>https://akismet.com/signup/</a> to get one.';
+$txt['blockspam_post_threshold'] = 'Maximum Post Threshold';
+$txt['blockspam_post_threshold_message'] = 'Members with more posts than this setting will not be checked.  Set low to improve site performance, cut down on Akismet API usage, and decrease the chance of false positives.';
+$txt['blockspam_flagged_name'] =  'Posted By';
+$txt['blockspam_flagged_date'] = 'Posted On';
+$txt['blockspam_flagged_subject'] = 'Subject';
+$txt['blockspam_flagged_body'] = 'Body';
+]]>
+            </add>
+        </operation>
+    </file>
+
+    <file name="$sourcedir/Subs.php" error="fatal">
+        <operation error="fatal">
+            <search position="before" regexp="false" whitespace="exact"><![CDATA[
+          	if (allowedTo('manage_attachments'))
+			$context['admin_areas']['layout']['areas']['manage_attachments'] = '<a href="' . $scripturl . '?action=manageattachments">' . $txt['smf201'] . '</a>';
+]]></search>
+            <add><![CDATA[
+		if (allowedTo('moderate_forum'))
+			$context['admin_areas']['layout']['areas']['blockspam'] = '<a href="' . $scripturl . '?action=blockspam">' . $txt['blockspam_plugin'] . '</a>';
+]]></add>
+        </operation>
+    </file>
+
+    <file name="$sourcedir/Subs-Post.php" error="fatal">
+        <operation error="fatal">
+            <search position="replace" regexp="false" whitespace="exact"><![CDATA[
+
+	// Insert the post.
+	db_query("
+		INSERT INTO {$db_prefix}messages
+			(ID_BOARD, ID_TOPIC, ID_MEMBER, subject, body, posterName, posterEmail, posterTime,
+			posterIP, smileysEnabled, modifiedName, spam, icon)
+		VALUES ($topicOptions[board], $topicOptions[id], $posterOptions[id], SUBSTRING('$msgOptions[subject]', 1, 255), SUBSTRING('$msgOptions[body]', 1, 65534), SUBSTRING('$posterOptions[name]', 1, 255), SUBSTRING('$posterOptions[email]', 1, 255), " . time() . ",
+			SUBSTRING('$posterOptions[ip]', 1, 255), " . ($msgOptions['smileys_enabled'] ? '1' : '0') . ", ''," . ($spam == true ? '1' : '0') . ", SUBSTRING('$msgOptions[icon]', 1, 16))", __FILE__, __LINE__);
+	$msgOptions['id'] = db_insert_id();
+
+]]></search>
+            <add><![CDATA[
+
+        global $sourcedir;
+        require_once($sourcedir . '/BlockSpam/BlockSpam.php');
+
+        global $postedSpam;
+        $postedSpam = BlockSpamCheckMessage();
+
+        if($postedSpam) {
+            // Insert the post into suspected spam messages queue
+            db_query("
+                    INSERT INTO {$db_prefix}spam_messages
+                            (ID_BOARD, ID_TOPIC, ID_MEMBER, subject, body, posterName, posterEmail, posterTime,
+                            posterIP, smileysEnabled, modifiedName, icon)
+                    VALUES ($topicOptions[board], $topicOptions[id], $posterOptions[id], SUBSTRING('$msgOptions[subject]', 1, 255), SUBSTRING('$msgOptions[body]', 1, 65534), SUBSTRING('$posterOptions[name]', 1, 255), SUBSTRING('$posterOptions[email]', 1, 255), " . time() . ",
+                            SUBSTRING('$posterOptions[ip]', 1, 255), " . ($msgOptions['smileys_enabled'] ? '1' : '0') . ", '', SUBSTRING('$msgOptions[icon]', 1, 16))", __FILE__, __LINE__);
+            redirectexit('board=' . $topicOptions[board] . '.0#postedSpam=true', $context['browser']['is_ie']);
+        } else {
+            // Insert the post.
+            db_query("
+                    INSERT INTO {$db_prefix}messages
+                            (ID_BOARD, ID_TOPIC, ID_MEMBER, subject, body, posterName, posterEmail, posterTime,
+                            posterIP, smileysEnabled, modifiedName, spam, icon)
+                    VALUES ($topicOptions[board], $topicOptions[id], $posterOptions[id], SUBSTRING('$msgOptions[subject]', 1, 255), SUBSTRING('$msgOptions[body]', 1, 65534), SUBSTRING('$posterOptions[name]', 1, 255), SUBSTRING('$posterOptions[email]', 1, 255), " . time() . ",
+                            SUBSTRING('$posterOptions[ip]', 1, 255), " . ($msgOptions['smileys_enabled'] ? '1' : '0') . ", '', SUBSTRING('$msgOptions[icon]', 1, 16))", __FILE__, __LINE__);
+            $msgOptions['id'] = db_insert_id();
+        }
+        
+  ]]></add>
+        </operation>
+    </file>
+</modification>
