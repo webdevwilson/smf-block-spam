@@ -25,6 +25,7 @@
             <search position="after" regexp="false" whitespace="exact"><![CDATA[?>]]></search>
             <add><![CDATA[
 
+$txt['blockspam_post_message'] = 'This forum is protected by ${project.name}.  Your post was suspected of being spam and must be approved by an administrator.';
 $txt['blockspam_plugin'] = 'BlockSpam Plugin';
 $txt['blockspam_admin_top'] = 'Monitor and configure the BlockSpam plugin';
 $txt['blockspam_flagged_posts'] = 'Flagged Posts';
@@ -33,6 +34,15 @@ $txt['blockspam_apikey'] = 'Akismet API Key';
 $txt['blockspam_apikey_message'] = 'BlockSpam utilizes the Akismet service.  You will need an API key.  Visit <a href=\'https://akismet.com/signup/\'>https://akismet.com/signup/</a> to get one.';
 $txt['blockspam_post_threshold'] = 'Maximum Post Threshold';
 $txt['blockspam_post_threshold_message'] = 'Members with more posts than this setting will not be checked.  Set low to improve site performance, cut down on Akismet API usage, and decrease the chance of false positives.';
+$txt['blockspam_settings_submit'] = 'Update Settings';
+$txt['blockspam_settings_updated'] = 'Settings Updated';
+$txt['blockspam_number_flagged'] = 'BlockSpam has flagged ##NUM_FLAGGED## spam message(s)';
+$txt['blockspam_delete_all'] =  'Delete All';
+$txt['blockspam_delete'] =  'Delete';
+$txt['blockspam_confirm_delete_all'] = 'Are you sure you would like to delete all the suspected spam messages?';
+$txt['blockspam_spam_deleted'] = 'Deleted ##NUM_DELETED## spam message(s)';
+$txt['blockspam_not_spam'] =  'Not Spam';
+$txt['blockspam_no_flagged_messages'] = 'There are currently no flagged messages.';
 $txt['blockspam_flagged_name'] =  'Posted By';
 $txt['blockspam_flagged_date'] = 'Posted On';
 $txt['blockspam_flagged_subject'] = 'Subject';
@@ -45,7 +55,7 @@ $txt['blockspam_flagged_body'] = 'Body';
     <file name="$sourcedir/Subs.php" error="fatal">
         <operation error="fatal">
             <search position="before" regexp="false" whitespace="exact"><![CDATA[
-          	if (allowedTo('manage_attachments'))
+		if (allowedTo('manage_attachments'))
 			$context['admin_areas']['layout']['areas']['manage_attachments'] = '<a href="' . $scripturl . '?action=manageattachments">' . $txt['smf201'] . '</a>';
 ]]></search>
             <add><![CDATA[
@@ -58,16 +68,14 @@ $txt['blockspam_flagged_body'] = 'Body';
     <file name="$sourcedir/Subs-Post.php" error="fatal">
         <operation error="fatal">
             <search position="replace" regexp="false" whitespace="exact"><![CDATA[
-
 	// Insert the post.
 	db_query("
 		INSERT INTO {$db_prefix}messages
 			(ID_BOARD, ID_TOPIC, ID_MEMBER, subject, body, posterName, posterEmail, posterTime,
-			posterIP, smileysEnabled, modifiedName, spam, icon)
+			posterIP, smileysEnabled, modifiedName, icon)
 		VALUES ($topicOptions[board], $topicOptions[id], $posterOptions[id], SUBSTRING('$msgOptions[subject]', 1, 255), SUBSTRING('$msgOptions[body]', 1, 65534), SUBSTRING('$posterOptions[name]', 1, 255), SUBSTRING('$posterOptions[email]', 1, 255), " . time() . ",
-			SUBSTRING('$posterOptions[ip]', 1, 255), " . ($msgOptions['smileys_enabled'] ? '1' : '0') . ", ''," . ($spam == true ? '1' : '0') . ", SUBSTRING('$msgOptions[icon]', 1, 16))", __FILE__, __LINE__);
+			SUBSTRING('$posterOptions[ip]', 1, 255), " . ($msgOptions['smileys_enabled'] ? '1' : '0') . ", '', SUBSTRING('$msgOptions[icon]', 1, 16))", __FILE__, __LINE__);
 	$msgOptions['id'] = db_insert_id();
-
 ]]></search>
             <add><![CDATA[
 
@@ -75,7 +83,7 @@ $txt['blockspam_flagged_body'] = 'Body';
         require_once($sourcedir . '/BlockSpam/BlockSpam.php');
 
         global $postedSpam;
-        $postedSpam = BlockSpamCheckMessage();
+        $postedSpam = BlockSpamCheckMessage($msgOptions, $topicOptions, $posterOptions);
 
         if($postedSpam) {
             // Insert the post into suspected spam messages queue
@@ -85,19 +93,43 @@ $txt['blockspam_flagged_body'] = 'Body';
                             posterIP, smileysEnabled, modifiedName, icon)
                     VALUES ($topicOptions[board], $topicOptions[id], $posterOptions[id], SUBSTRING('$msgOptions[subject]', 1, 255), SUBSTRING('$msgOptions[body]', 1, 65534), SUBSTRING('$posterOptions[name]', 1, 255), SUBSTRING('$posterOptions[email]', 1, 255), " . time() . ",
                             SUBSTRING('$posterOptions[ip]', 1, 255), " . ($msgOptions['smileys_enabled'] ? '1' : '0') . ", '', SUBSTRING('$msgOptions[icon]', 1, 16))", __FILE__, __LINE__);
-            redirectexit('board=' . $topicOptions[board] . '.0#postedSpam=true', $context['browser']['is_ie']);
+            redirectexit('board=' . $topicOptions[board] . '.0;postedSpam=true', $context['browser']['is_ie']);
         } else {
             // Insert the post.
             db_query("
                     INSERT INTO {$db_prefix}messages
                             (ID_BOARD, ID_TOPIC, ID_MEMBER, subject, body, posterName, posterEmail, posterTime,
-                            posterIP, smileysEnabled, modifiedName, spam, icon)
+                            posterIP, smileysEnabled, modifiedName, icon)
                     VALUES ($topicOptions[board], $topicOptions[id], $posterOptions[id], SUBSTRING('$msgOptions[subject]', 1, 255), SUBSTRING('$msgOptions[body]', 1, 65534), SUBSTRING('$posterOptions[name]', 1, 255), SUBSTRING('$posterOptions[email]', 1, 255), " . time() . ",
                             SUBSTRING('$posterOptions[ip]', 1, 255), " . ($msgOptions['smileys_enabled'] ? '1' : '0') . ", '', SUBSTRING('$msgOptions[icon]', 1, 16))", __FILE__, __LINE__);
             $msgOptions['id'] = db_insert_id();
         }
         
   ]]></add>
+        </operation>
+    </file>
+    <file name="$themedir/Display.template.php">
+        <operation>
+            <search position="after" regexp="false" whitespace="exact"><![CDATA[
+	// Show the page index... "Pages: [1]".]]>
+            </search>
+            <add><![CDATA[
+        // SMF Block Spam Spam Blocked Message
+	if (isset($_GET['postedSpam']))
+		echo '<div class="error">', $txt['blockspam_post_message'], '</div>';]]>
+            </add>
+        </operation>
+    </file>
+    <file name="$themedir/MessageIndex.template.php">
+        <operation>
+            <search position="after" regexp="false" whitespace="exact"><![CDATA[            
+	if (!empty($options['show_board_desc']) && $context['description'] != '')]]>
+            </search>
+            <add><![CDATA[
+        // SMF Block Spam Spam Blocked Message
+	if (isset($_GET['postedSpam']))
+		echo '<div class="error">', $txt['blockspam_post_message'], '</div>';]]>
+            </add>
         </operation>
     </file>
 </modification>

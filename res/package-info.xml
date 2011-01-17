@@ -7,7 +7,7 @@
     <type>modification</type>
 
     <install for="1.1.12">
-        <readme>README</readme>
+        <readme type="file" parsebbc="true">README</readme>
         <require-dir name="BlockSpam" destination="$sourcedir" />
         <require-file name="BlockSpam.php" destination="$sourcedir" />
         <require-file name="BlockSpam.template.php" destination="$themedir" />

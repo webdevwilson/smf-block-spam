@@ -1,8 +1,8 @@
 <?php
 
-function BlockSpamCheckMessage() {
+function BlockSpamCheckMessage($msgOptions, $topicOptions, $posterOptions) {
 
-    global $scripturl, $user_info, $msgOptions, $posterOptions, $topicOptions, $modSettings;
+    global $scripturl, $user_info, $modSettings, $db_prefix;
 
     require_once( dirname(__FILE__) . '/Akismet.class.php' );
 
@@ -14,19 +14,27 @@ function BlockSpamCheckMessage() {
         if ($apiKey && $apiKey != '') {
 
             $akismet = new Akismet($scripturl, $apiKey);
-            if ($msgOptions['subject'] == 'viagra-test-123') {
-                $akismet->setAuthor('viagra-test-123');
+            if ($isTest) {
+                $author = 'viagra-test-123';
             } else {
-                $akismet->setAuthor($posterOptions['name']);
+                $author = $posterOptions['name'];
             }
-            $akismet->setAuthorEmail($posterOptions['email']);
-            $akismet->setContent($msgOptions['body']);
-            if (!empty($topicOptions['id']))
-                $akismet->setPermalink($scripturl . '?topic=' . $topicOptions['id']);
-            $akismet->setType('smf-post');
 
+            if (!empty($topicOptions['id'])) {
+                $permaLink = $scripturl . '?topic=' . $topicOptions['id'];
+            } else {
+                $permaLink = $scripturl . '?board=' . $topicOptions['board'];
+            }
+
+            $comment = array('body' => $msgOptions['body'],
+                'author' => $author,
+                'email' => $posterOptions['email'],
+                'type' => 'smf-post',
+                'permalink' => $permaLink);
+
+            $akismet->setComment($comment);
             $postedSpam = $akismet->isSpam();
-
+          
             if ($postedSpam === true) {
                 db_query("UPDATE {$db_prefix}settings SET value = value + 1 WHERE variable = 'blockSpamCaughtMessages'", __FILE__, __LINE__);
             }

@@ -3,7 +3,7 @@
 
     <!-- project metadata -->
     <property name="project.name"           value="${ant.project.name}" />
-    <property name="project.description"    value="SMF Block Spam" />
+    <property name="project.description"    value="SMF BlockSpam" />
     <property name="project.version"        value="0.1" />
     <property name="project.author.id"      value="webdevwilson" />
     <property name="project.author.name"    value="Kerry Wilson" />
