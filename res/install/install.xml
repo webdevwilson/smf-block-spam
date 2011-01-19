@@ -41,6 +41,7 @@ $txt['blockspam_delete_all'] =  'Delete All';
 $txt['blockspam_delete'] =  'Delete';
 $txt['blockspam_confirm_delete_all'] = 'Are you sure you would like to delete all the suspected spam messages?';
 $txt['blockspam_spam_deleted'] = 'Deleted ##NUM_DELETED## spam message(s)';
+$txt['blockspam_marked_not_spam'] = '##NUM_DELETED## message(s) marked as Not Spam';
 $txt['blockspam_not_spam'] =  'Not Spam';
 $txt['blockspam_no_flagged_messages'] = 'There are currently no flagged messages.';
 $txt['blockspam_flagged_name'] =  'Posted By';
@@ -104,15 +105,15 @@ $txt['blockspam_flagged_body'] = 'Body';
                             SUBSTRING('$posterOptions[ip]', 1, 255), " . ($msgOptions['smileys_enabled'] ? '1' : '0') . ", '', SUBSTRING('$msgOptions[icon]', 1, 16))", __FILE__, __LINE__);
             $msgOptions['id'] = db_insert_id();
         }
-        
+
   ]]></add>
         </operation>
     </file>
     <file name="$themedir/Display.template.php">
         <operation>
             <search position="after" regexp="false" whitespace="exact"><![CDATA[
-	// Show the page index... "Pages: [1]".]]>
-            </search>
+	// Show the page index... "Pages: [1]".
+]]></search>
             <add><![CDATA[
         // SMF Block Spam Spam Blocked Message
 	if (isset($_GET['postedSpam']))
@@ -122,14 +123,14 @@ $txt['blockspam_flagged_body'] = 'Body';
     </file>
     <file name="$themedir/MessageIndex.template.php">
         <operation>
-            <search position="after" regexp="false" whitespace="exact"><![CDATA[            
-	if (!empty($options['show_board_desc']) && $context['description'] != '')]]>
-            </search>
+            <search position="after" regexp="false" whitespace="exact"><![CDATA[
+	if (!empty($options['show_board_desc']) && $context['description'] != '')
+]]></search>
             <add><![CDATA[
         // SMF Block Spam Spam Blocked Message
 	if (isset($_GET['postedSpam']))
-		echo '<div class="error">', $txt['blockspam_post_message'], '</div>';]]>
-            </add>
+		echo '<div class="error">', $txt['blockspam_post_message'], '</div>';
+]]></add>
         </operation>
     </file>
 </modification>

@@ -2,6 +2,6 @@
 
 ${project.name} uses Akismet to block spam posts and registrations in SMF
 
-Note: To use ${project.description} you will need an Akismet API key.  Please visit [url]https://akismet.com/signup/[/url] to get one.
+Note: To use ${project.description} you will need an Akismet API key.  Please visit [url]https://akismet.com/signup/[/url] for more information.
 
 [i](c) ${project.copyright.year} ${project.author.name} - ${project.author.url} Version: ${project.version} (Build: ${build.id})[/i]

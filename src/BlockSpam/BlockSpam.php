@@ -1,5 +1,10 @@
 <?php
 
+if (!defined('SMF'))
+    die('Hacking attempt...');
+
+define('TEST_SUBJECT', 'viagra-test-123');
+
 function BlockSpamCheckMessage($msgOptions, $topicOptions, $posterOptions) {
 
     global $scripturl, $user_info, $modSettings, $db_prefix;
@@ -20,11 +25,7 @@ function BlockSpamCheckMessage($msgOptions, $topicOptions, $posterOptions) {
                 $author = $posterOptions['name'];
             }
 
-            if (!empty($topicOptions['id'])) {
-                $permaLink = $scripturl . '?topic=' . $topicOptions['id'];
-            } else {
-                $permaLink = $scripturl . '?board=' . $topicOptions['board'];
-            }
+            $permaLink = BlockSpamPermaLink($topicOptions['board'], $topicOptions['id']);
 
             $comment = array('body' => $msgOptions['body'],
                 'author' => $author,
@@ -34,11 +35,46 @@ function BlockSpamCheckMessage($msgOptions, $topicOptions, $posterOptions) {
 
             $akismet->setComment($comment);
             $postedSpam = $akismet->isSpam();
-          
+
             if ($postedSpam === true) {
                 db_query("UPDATE {$db_prefix}settings SET value = value + 1 WHERE variable = 'blockSpamCaughtMessages'", __FILE__, __LINE__);
             }
             return $postedSpam === true;
         }
     }
+}
+
+function BlockSpamPermaLink($board, $topic) {
+    global $scripturl;
+    if (intval($topic) > 0) {
+        return $scripturl . '?topic=' . $topic;
+    } else {
+        return $scripturl . '?board=' . $board;
+    }
+}
+
+function BlockSpamSubmitHam($body, $author, $email, $board, $topic) {
+
+    global $scripturl, $modSettings;
+
+    require_once( dirname(__FILE__) . '/Akismet.class.php' );
+
+    // don't report test stuff
+    if ($author == 'viagra-test-123') {
+        return;
+    }
+
+    $apiKey = $modSettings['blockSpamAkismetKey'];
+
+    $akismet = new Akismet($scripturl, $apiKey);
+
+    $comment = array('body' => $body,
+        'author' => $author,
+        'email' => $email,
+        'permalink' => BlockSpamPermaLink($board, $topic),
+        'type' => 'smf-post');
+
+    $akismet->setComment($comment);
+
+    $akismet->submitHam();
 }

@@ -41,7 +41,7 @@ function template_main() {
     if( isset($context['blockspam_message']) ) {
         echo '          <p style="color: #0c0; font-weight: bold;">', $context['blockspam_message'], '</p>';
     }
-    if( !isset($_REQUEST['sa']) || $_REQUEST['sa'] == 'messages') {
+    if( $context['blockspam_view'] == 'messages') {
         echo '
                         <script type="text/javascript">
                             var blockSpam = {
@@ -108,7 +108,7 @@ function template_main() {
                             </table>
                             </form>';
 
-    } else if ($_REQUEST['sa'] == 'settings') {
+    } else if ($context['blockspam_view'] == 'settings') {
         echo '
                             <form action="', $scripturl, '?action=blockspam&sa=settings" method="post">
                             <table border="0" width="100%" cellspacing="0" cellpadding="4" align="center" class="tborder">
