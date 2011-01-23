@@ -87,6 +87,9 @@ function BlockSpam() {
                         }
                     }
 
+                    // increment the member's post count
+                    db_query("UPDATE {$db_prefix}members SET posts = posts + 1 WHERE ID_MEMBER={$msg['ID_MEMBER']}", __FILE__, __LINE__);
+
                     db_query("DELETE FROM {$db_prefix}spam_messages WHERE ID_MSG={$spamId}", __FILE__, __LINE__);
 
                     $i++;

@@ -56,7 +56,7 @@ $txt['blockspam_flagged_body'] = 'Body';
     <file name="$sourcedir/Subs.php" error="fatal">
         <operation error="fatal">
             <search position="before" regexp="false" whitespace="exact"><![CDATA[
-		if (allowedTo('manage_attachments'))
+          	if (allowedTo('manage_attachments'))
 			$context['admin_areas']['layout']['areas']['manage_attachments'] = '<a href="' . $scripturl . '?action=manageattachments">' . $txt['smf201'] . '</a>';
 ]]></search>
             <add><![CDATA[
