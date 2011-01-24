@@ -60,8 +60,12 @@ $txt['blockspam_flagged_body'] = 'Body';
 			$context['admin_areas']['layout']['areas']['manage_attachments'] = '<a href="' . $scripturl . '?action=manageattachments">' . $txt['smf201'] . '</a>';
 ]]></search>
             <add><![CDATA[
-		if (allowedTo('moderate_forum'))
-			$context['admin_areas']['layout']['areas']['blockspam'] = '<a href="' . $scripturl . '?action=blockspam">' . $txt['blockspam_plugin'] . '</a>';
+                global $db_prefix;
+		if (allowedTo('moderate_forum')) {
+                        $results = db_query("SELECT COUNT(*) FROM {$db_prefix}spam_messages", __FILE__, __LINE__);
+			list($spamCount) = mysql_fetch_array($results, MYSQL_NUM);
+                        $context['admin_areas']['layout']['areas']['blockspam'] = '<a href="' . $scripturl . '?action=blockspam">' . $txt['blockspam_plugin'] . ( $spamCount > 0 ? " <b>({$spamCount})</b>" : '' ) . '</a>';
+                }
 ]]></add>
         </operation>
     </file>
