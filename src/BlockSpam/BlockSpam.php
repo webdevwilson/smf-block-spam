@@ -12,7 +12,7 @@ function BlockSpamCheckMessage($msgOptions, $topicOptions, $posterOptions) {
     require_once( dirname(__FILE__) . '/Akismet.class.php' );
 
     // If the subject is 'viagra-test-123', then mark it as spam (this is a test)
-    $isTest = $msgOptions['subject'] == 'viagra-test-123';
+    $isTest = $msgOptions['subject'] == TEST_SUBJECT;
     if ($user_info['posts'] < $modSettings['blockSpamPostThreshold'] || $isTest) {
 
         $apiKey = $modSettings['blockSpamAkismetKey'];
@@ -20,7 +20,7 @@ function BlockSpamCheckMessage($msgOptions, $topicOptions, $posterOptions) {
 
             $akismet = new Akismet($scripturl, $apiKey);
             if ($isTest) {
-                $author = 'viagra-test-123';
+                $author = TEST_SUBJECT;
             } else {
                 $author = $posterOptions['name'];
             }
@@ -60,7 +60,7 @@ function BlockSpamSubmitHam($body, $author, $email, $board, $topic) {
     require_once( dirname(__FILE__) . '/Akismet.class.php' );
 
     // don't report test stuff
-    if ($author == 'viagra-test-123') {
+    if ($author == TEST_SUBJECT) {
         return;
     }
 

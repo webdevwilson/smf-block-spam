@@ -58,9 +58,9 @@ function BlockSpam() {
                                                                 `ID_MSG_MODIFIED`, `subject`, `posterName`, `posterEmail`,
                                                                 `posterIP`, `smileysEnabled`, `modifiedTime`, `modifiedName`, `body`, `icon` )
                               VALUES (" . $msg['ID_TOPIC'] . ', ' . $msg['ID_BOARD'] . ', ' . $msg['posterTime'] . ', '
-                            . $msg['ID_MEMBER'] . ', ' . $msg['ID_MSG_MODIFIED'] . ', ' . $msg['posterTime'] . ', \'' . addslashes($msg['subject']) . '\', \''
+                            . $msg['ID_MEMBER'] . ', ' . $msg['ID_MSG_MODIFIED'] . ', \'' . addslashes($msg['subject']) . '\', \''
                             . addslashes($msg['posterName']) . '\', \'' . $msg['posterEmail'] . '\', \'' . $msg['posterIP'] . '\', '
-                            . $msg['smileysEnabled'] . ', ' . $msg['modifiedTime'] . ', \'' . addslashes($msg['body']) . '\', \'' . $msg['icon'] . '\')', __FILE__, __LINE__);
+                            . $msg['smileysEnabled'] . ', ' . $msg['modifiedTime'] . ', \'\',\'' . addslashes($msg['body']) . '\', \'' . $msg['icon'] . '\')', __FILE__, __LINE__);
                     $msg['ID_MSG'] = db_insert_id();
 
                     $newTopic = false;
